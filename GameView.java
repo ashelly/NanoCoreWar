@@ -3,7 +3,7 @@ import java.awt.*;
 /**
  * This class represents a single instruction line.
  * 
- * @author TheBestOne, Ilmari Karonen
+ * @author TheBestOne, Ilmari Karonen, ashelly
  * @version 3/18/15
  */
 public class GameView extends JComponent{
@@ -31,35 +31,38 @@ public class GameView extends JComponent{
     private int playerTwoLocation;
     private int time, turn;
 
-    final static int width = 128;
-    final static int height = 64;
+    public int width = 128;
+    public int height = 64;
 
     public GameView(Game game) {
         this.game = game;
         this.coreData = new int[game.coreSize];
         this.frame = new JFrame("Game");
+        this.width = 128;
+        this.height = game.coreSize/this.width;
+        while (height*2 < width) {
+            height*=2; width/=2;
+        }
+        /* make at least 1024 screen pix wide */
+        int scale = 1;
+        while (scale*width<=512) { scale *=2; }
         frame.add(this);
         frame.setVisible(true);
         frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        frame.setSize(width*4, height*4);
+        frame.setSize(width*scale, height*scale);
     }
 
     @Override
     public void paint(Graphics g) {
-        int pixelWidth = getSize().width;
-        int pixelHeight = getSize().height;
-        if (width > pixelWidth){
-            pixelWidth = width;
-            setSize(width, pixelHeight);
-        }
-        if (height > pixelHeight){
-            pixelHeight = height;
-            setSize(pixelWidth, height);
-        }
-        int squareWidth = Math.min(pixelWidth / width, pixelHeight / height);
-        for (int x = 0; x < squareWidth * width; x += squareWidth){
-            for (int y = 0; y < squareWidth * height; y += squareWidth){
-                int index = (y / squareWidth) * width + (x / squareWidth);
+        int frameWidth = getSize().width;
+        int frameHeight = getSize().height;
+
+        int pixelWidth = frameWidth/width;
+        int pixelHeight = frameHeight/height;
+
+        for (int x = 0; x < width; x+= 1){
+            for (int y = 0; y < height; y+= 1){
+                int index = y*width+x;
                 Color color = specialColors[coreData[index]];
                 if (index == playerOneLocation){
                     color = playerOneColor;
@@ -68,7 +71,10 @@ public class GameView extends JComponent{
                     color = playerTwoColor;
                 }
                 g.setColor(color);
-                g.fillRect(x, y, squareWidth, squareWidth);
+
+                int px=x*pixelWidth;
+                int py=y*pixelHeight;
+                g.fillRect(px,py,pixelWidth, pixelHeight);
             }
         }
     }
